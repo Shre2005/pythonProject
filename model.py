@@ -10,7 +10,7 @@ df = pd.read_csv('output2.csv')
 
 print(df.columns)
 
-df.fillna({ 'stemmed_content': ''}, inplace=True)
+df.fillna({'stemmed_content': ''}, inplace=True)
 
 print(df.isnull().sum())
 
@@ -23,6 +23,7 @@ print(df['tokenized_text'])
 
 padded_sequences = pad_sequences(df['tokenized_text'], maxlen=100, padding='post', truncating='post')
 
+# Six categories: sadness (0), joy (1), love (2), anger (3), fear (4), and surprise (5)
 num_classes = 6  # 0 to 5 sentiments
 
 one_hot_labels = to_categorical(df['label'], num_classes=num_classes)
@@ -39,22 +40,8 @@ model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accur
 
 early_stopping = EarlyStopping(monitor='val_loss', patience=3, restore_best_weights=True)
 
-batch_size = 128
-epochs = 1  # You can adjust this based on your needs
-model.fit(padded_sequences, one_hot_labels, batch_size=batch_size, epochs=epochs, validation_split=0.2, callbacks=[early_stopping])
-
-# Testing the model on a single input
-# Example usage for prediction
-new_texts = ["I love this product!", "Terrible service."]
-# Convert to DataFrame
-df_input = pd.DataFrame(new_texts, columns=["Text"])
-tokenizer.fit_on_texts(df_input["Text"])
-
-new_sequences = tokenizer.texts_to_sequences(df_input["Text"])
-print(new_sequences)
-
-padded_sequences_input = pad_sequences(new_sequences, maxlen=100, padding='post', truncating='post')
-print(model.predict(padded_sequences_input))
+epochs = 50  # You can adjust this based on your needs
+model.fit(padded_sequences, one_hot_labels, epochs=epochs, validation_split=0.2, callbacks=[early_stopping])
 
 # To save the model
-model.save('/home/shreyansh/ml-project/pythonProject/saved_model_1.keras')
+model.save('saved_model_final.keras')
